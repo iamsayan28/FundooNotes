@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="BusinessLayer/BusinessLayer.csproj" Id="70e3510f-875f-4d48-b094-5877d656de6f" />
+  <Project Path="FundooNotes.Web/FundooNotes.Web.csproj" />
+  <Project Path="ModelLayer/ModelLayer.csproj" Id="3d423cdd-6fcb-4682-b7a5-94eec5d3b340" />
+  <Project Path="RepositoryLayer/RepositoryLayer.csproj" Id="c142169a-b29b-480e-bf28-20b1c5b947f0" />
+</Solution>

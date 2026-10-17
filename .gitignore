@@ -1,0 +1,68 @@
+# Build output
+**/bin/
+**/obj/
+**/out/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Visual Studio temporary files
+*.tmp
+*.temp
+*.cache
+
+# Build and test results
+TestResults/
+[Tt]est[Rr]esult*/
+*.coverage
+*.coveragexml
+
+# NuGet
+*.nupkg
+*.snupkg
+packages/
+
+# Logs
+*.log
+
+# Environment and local configuration
+.env
+.env.*
+!.env.example
+appsettings.Development.json
+appsettings.Local.json
+
+# Secrets and certificates
+*.pfx
+*.p12
+*.key
+*.pem
+secrets.json
+
+# OS files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Rider / JetBrains
+.idea/
+*.sln.iml
+
+# Publish output
+publish/
+artifacts/
+
+# Local database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Azure / deployment local files
+.azure/
+
+# Node.js (if added later)
+node_modules/
