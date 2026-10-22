@@ -66,7 +66,6 @@ namespace BusinessLayer.Service
 
         public async Task ForgotPasswordAsync(string email)
         {
-            //first check if email exists or not
             var user = await _userRepo.GetUserByEmailId(email.Trim());
             
             if (user == null) return;

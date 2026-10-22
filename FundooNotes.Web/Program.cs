@@ -33,6 +33,13 @@ namespace FundooNotes.Web
 
             builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
             builder.Services.AddTransient<IEmailService, EmailService>();
+            
+            // add redis service
+            builder.Services.AddStackExchangeRedisCache(options =>
+            {
+                options.Configuration = "localhost:6379";
+                options.InstanceName = "FundooNotes:";
+            });
 
             // 1. Add Swagger services
             builder.Services.AddEndpointsApiExplorer();
@@ -45,6 +52,7 @@ namespace FundooNotes.Web
             builder.Services.AddScoped<IJwtService, JwtService>();
             builder.Services.AddScoped<INoteService, NoteService>();
             builder.Services.AddScoped<INoteRepository, NoteRepository>();
+            builder.Services.AddSingleton<IEncryptionService, AesGcmEncryptionService>();
 
             //---
             var jwtKey = builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException("JWT key is missing.");

@@ -7,6 +7,7 @@ using System.Globalization;
 using System.Security.Claims;
 using BusinessLayer.Service;
 using ModelLayer.Models.Note;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace FundooNotes.Web.Controllers
 {
@@ -19,6 +20,17 @@ namespace FundooNotes.Web.Controllers
         public NotesController(INoteService noteService)
         {
             _noteService = noteService;
+        }
+
+        [HttpGet("test-redis")]
+        //[Route()]
+        public async Task<IActionResult> TestRedis([FromServices] IDistributedCache cache)
+        {
+            await cache.SetStringAsync("test-key", "Redis connected!");
+
+            var value = await cache.GetStringAsync("test-key"); 
+
+            return Ok(new { message = value });
         }
 
         [HttpGet]

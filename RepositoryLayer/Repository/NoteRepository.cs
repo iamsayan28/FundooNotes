@@ -22,6 +22,7 @@ namespace RepositoryLayer.Repository
         {
             return await _context.Notes.Where(n => n.UserId == id && !n.IsArchived).ToListAsync();
         }
+
         public async Task<NoteEntity> AddNote(NoteEntity note)
         {
             _context.Notes.Add(note);
@@ -57,21 +58,17 @@ namespace RepositoryLayer.Repository
 
         public async Task<NoteEntity?> GetNoteById(int noteId, int userId)
         {
-            return await _context.Notes
-                .FirstOrDefaultAsync(n => n.Id == noteId && n.UserId == userId);
+            return await _context.Notes.FirstOrDefaultAsync(n => n.Id == noteId && n.UserId == userId);
         }
 
         public async Task<IEnumerable<NoteEntity>> GetArchivedNotes(int userId)
         {
-            return await _context.Notes
-                .Where(n => n.UserId == userId && n.IsArchived)
-                .ToListAsync();
+            return await _context.Notes.Where(n => n.UserId == userId && n.IsArchived).ToListAsync();
         }
 
         public async Task<NoteEntity?> ArchiveNote(int noteId, int userId)
         {
-            var note = await _context.Notes
-                .FirstOrDefaultAsync(n => n.Id == noteId && n.UserId == userId);
+            var note = await _context.Notes.FirstOrDefaultAsync(n => n.Id == noteId && n.UserId == userId);
 
             if (note == null)
                 return null;
@@ -86,8 +83,7 @@ namespace RepositoryLayer.Repository
 
         public async Task<NoteEntity?> UnarchiveNote(int noteId, int userId)
         {
-            var note = await _context.Notes
-                .FirstOrDefaultAsync(n => n.Id == noteId && n.UserId == userId && n.IsArchived);
+            var note = await _context.Notes.FirstOrDefaultAsync(n => n.Id == noteId && n.UserId == userId && n.IsArchived);
 
             if (note == null)
                 return null;
