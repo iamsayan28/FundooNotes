@@ -23,7 +23,7 @@ namespace FundooNotes.Web.Controllers
             _userService = userService;
         }
 
-        public string Welcome() 
+        private string Welcome() 
         {
             return "Welcome to fundoo app";
         }

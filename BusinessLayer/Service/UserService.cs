@@ -26,7 +26,8 @@ namespace BusinessLayer.Service
 
 
         public async Task<UserRegistrationModel> RegisterUser(UserRegistrationModel registrationModel)
-        {
+        { 
+
             UserEntity user = new UserEntity()
             {
                 FirstName = registrationModel.FirstName,

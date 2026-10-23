@@ -64,7 +64,10 @@ namespace BusinessLayer.Service
 
             if (!encryptedText.StartsWith(Prefix, StringComparison.Ordinal))
             {
-                throw new CryptographicException("Unsupported encrypted data format.");
+                //throw new CryptographicException("Unsupported encrypted data format.");
+
+                // to mitigate and return old un-encrypted text
+                return encryptedText;
             }
 
             byte[] payload;

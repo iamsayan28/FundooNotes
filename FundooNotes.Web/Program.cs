@@ -1,13 +1,16 @@
 using BusinessLayer.Interface;
 using BusinessLayer.Service;
 using FundooNotes.Web.Configuration;
+using FundooNotes.Web.Extensions;
 using FundooNotes.Web.Service;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using RepositoryLayer.Context;
+using Microsoft.OpenApi.Models;
 using ModelLayer.Entity;
+using NLog.Web;
+using RepositoryLayer.Context;
 using RepositoryLayer.Interface;
 using RepositoryLayer.Repository;
 using System.Text;
@@ -20,11 +23,11 @@ namespace FundooNotes.Web
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            builder.Logging.ClearProviders();
+            builder.Host.UseNLog();
+
             // Add services to the container.
-
             builder.Services.AddControllers();
-
-
             var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
             builder.Services.AddDbContext<FundooDbContext>(options =>
@@ -42,10 +45,10 @@ namespace FundooNotes.Web
             });
 
             // 1. Add Swagger services
-            builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
-            //---
+            //builder.Services.AddEndpointsApiExplorer();
+            builder.Services.AddSwaggerConfiguration();
 
+            // DI ---
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IUserRepository, UserRepository>();
             builder.Services.AddScoped<IPasswordHasher<UserEntity>, PasswordHasher<UserEntity>>();
@@ -76,11 +79,37 @@ namespace FundooNotes.Web
                         ClockSkew = TimeSpan.Zero
                     };
                 });
-                
+
+            //builder.Services.AddSwaggerGen(options =>
+            //{
+            //    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+            //    {
+            //        Name = "Authorization",
+            //        Type = SecuritySchemeType.Http,
+            //        Scheme = "bearer",
+            //        BearerFormat = "JWT",
+            //        In = ParameterLocation.Header,
+            //        Description = "Enter your JWT token."
+            //    });
+
+            //    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+            //    {
+            //        {
+            //            new OpenApiSecurityScheme
+            //            {
+            //                Reference = new OpenApiReference
+            //                {
+            //                    Type = ReferenceType.SecurityScheme,
+            //                    Id = "Bearer"
+            //                }
+            //            },
+            //            new List<string>()
+            //        }
+            //    });
+            //});
+
             builder.Services.AddAuthorization();
             // ---
-
-
 
             var app = builder.Build();
 
@@ -92,6 +121,7 @@ namespace FundooNotes.Web
                 app.UseSwagger();
                 app.UseSwaggerUI(); // <-- Serves Swagger UI at /swagger
             }//----
+
 
             app.UseHttpsRedirection();
 

@@ -17,13 +17,14 @@ namespace FundooNotes.Web.Controllers
     public class NotesController : ControllerBase
     {
         private readonly INoteService _noteService;
-        public NotesController(INoteService noteService)
+        private readonly ILogger<NotesController> _logger;
+        public NotesController(INoteService noteService, ILogger<NotesController> logger)
         {
             _noteService = noteService;
+            _logger = logger;
         }
 
         [HttpGet("test-redis")]
-        //[Route()]
         public async Task<IActionResult> TestRedis([FromServices] IDistributedCache cache)
         {
             await cache.SetStringAsync("test-key", "Redis connected!");
@@ -42,6 +43,8 @@ namespace FundooNotes.Web.Controllers
             {
                 return Unauthorized();
             }
+
+            _logger.LogInformation("Fetching notes for user {UserId}", userId); 
 
             var notes = await _noteService.GetAllNotesByUserId(userId);
 
