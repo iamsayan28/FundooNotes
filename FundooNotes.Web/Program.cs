@@ -1,6 +1,7 @@
 using BusinessLayer.Interface;
 using BusinessLayer.Service;
 using FundooNotes.Web.Configuration;
+using FundooNotes.Web.Exceptions;
 using FundooNotes.Web.Extensions;
 using FundooNotes.Web.Service;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -47,6 +48,10 @@ namespace FundooNotes.Web
             // 1. Add Swagger services
             //builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerConfiguration();
+
+            // Add Exception Handler service
+            builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+            builder.Services.AddProblemDetails();
 
             // DI ---
             builder.Services.AddScoped<IUserService, UserService>();
@@ -113,14 +118,13 @@ namespace FundooNotes.Web
 
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
-
-            // 2. Enable Swagger middleware in development
+            app.UseExceptionHandler();
+            
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
-                app.UseSwaggerUI(); // <-- Serves Swagger UI at /swagger
-            }//----
+                app.UseSwaggerUI(); // Serves Swagger UI at /swagger
+            }
 
 
             app.UseHttpsRedirection();

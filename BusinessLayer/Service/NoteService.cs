@@ -105,82 +105,61 @@ namespace BusinessLayer.Service
 
         public async Task<NoteEntity> CreateNote(CreateNoteModel model, int userId)
         {
-            try
+
+            var note = new NoteEntity()
             {
-                var note = new NoteEntity()
-                {
-                    UserId = userId,
-                    Title = _encryptionService.Encrypt(model.Title),
-                    Description = model.Description == null ? null : _encryptionService.Encrypt(model.Description),
-                    CreatedOn = DateTime.UtcNow,
-                };
+                UserId = userId,
+                Title = _encryptionService.Encrypt(model.Title),
+                Description = model.Description == null ? null : _encryptionService.Encrypt(model.Description),
+                CreatedOn = DateTime.UtcNow,
+            };
 
-                var createdNote = await _noteRepo.AddNote(note);
+            var createdNote = await _noteRepo.AddNote(note);
 
-                // -- to prevent retrieving stale cache -- 
-                await InvalidateNoteCache(userId);
+            // -- to prevent retrieving stale cache -- 
+            await InvalidateNoteCache(userId);
 
-                _logger.LogInformation("Note created. NoteId={NoteId}, UserId={UserId}", createdNote.Id, userId);
+            _logger.LogInformation("Note created. NoteId={NoteId}, UserId={UserId}", createdNote.Id, userId);
 
-                return CreateDecryptedCopy(createdNote);
-            }
-            catch(Exception ex)
-            {
-                _logger.LogError(ex, "Failed to create note. UserId={UserId}", userId);
-                throw;
-            }
+            return CreateDecryptedCopy(createdNote);
         }
 
         public async Task<NoteEntity?> UpdateNote(UpdateNoteModel model, int noteId, int userId)
         {
             _logger.LogInformation("Updating Note. User Id: {userId}, Note Id: {noteId}", userId, noteId);
 
-            try
-            {
-                var note = await _noteRepo.GetNoteByUserId(noteId, userId);
+            var note = await _noteRepo.GetNoteByUserId(noteId, userId);
 
-                if (note == null) return null;
+            if (note == null) return null;
 
-                if (!string.IsNullOrWhiteSpace(model.Title)) note.Title = _encryptionService.Encrypt(model.Title);
-                if (model.ClearDescription) note.Description = null;
-                if (model.Description != null) note.Description = _encryptionService.Encrypt(model.Description);
+            if (!string.IsNullOrWhiteSpace(model.Title)) note.Title = _encryptionService.Encrypt(model.Title);
+            if (model.ClearDescription) note.Description = null;
+            if (model.Description != null) note.Description = _encryptionService.Encrypt(model.Description);
 
-                note.UpdatedOn = DateTime.UtcNow;
+            note.UpdatedOn = DateTime.UtcNow;
 
-                var updatedNote = await _noteRepo.UpdateNote(note);
-                await InvalidateNoteCache(userId, noteId);
+            var updatedNote = await _noteRepo.UpdateNote(note);
+            await InvalidateNoteCache(userId, noteId);
 
-                _logger.LogInformation("Note Updated . User Id: {userId}, Note Id: {noteId}", userId, noteId);
+            _logger.LogInformation("Note Updated . User Id: {userId}, Note Id: {noteId}", userId, noteId);
 
-                return CreateDecryptedCopy(updatedNote);
-            }catch(Exception ex)
-            {
-                _logger.LogError(ex, "Failed to update note. User Id: {userId}, Note Id: {noteId}", userId, noteId);
-                throw;
-            }
+            return CreateDecryptedCopy(updatedNote);
         }
 
         public async Task<bool> DeleteNote(int noteId, int userId)
         {
-            try
-            {
-                var result = await _noteRepo.DeleteNote(noteId, userId);
+            var result = await _noteRepo.DeleteNote(noteId, userId);
 
-                if (!result)
-                {
-                    _logger.LogWarning("Delete failed: note {NoteId} not found for user {UserId}", noteId, userId);
-                    return false;
-                }
-                
-                await InvalidateNoteCache(userId, noteId);
-
-                _logger.LogInformation("Successful Deletion for note {NoteId} and user {userId}", noteId, userId);
-                return true;
-            }catch(Exception ex)
+            if (!result)
             {
-                _logger.LogError(ex, "Failed to delete note {NoteId} for user {UserId}", noteId, userId);
-                throw;
+                _logger.LogWarning("Delete failed: note {NoteId} not found for user {UserId}", noteId, userId);
+                return false;
             }
+                
+            await InvalidateNoteCache(userId, noteId);
+
+            _logger.LogInformation("Successful Deletion for note {NoteId} and user {userId}", noteId, userId);
+            return true;
         }
 
         public async Task<NoteEntity?> GetNoteById(int noteId, int userId)
