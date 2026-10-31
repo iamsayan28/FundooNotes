@@ -1,20 +1,20 @@
 using BusinessLayer.Interface;
 using BusinessLayer.Service;
 using FundooNotes.Web.Configuration;
-using FundooNotes.Web.Exceptions;
+using FundooNotes.Web.Middleware;
 using FundooNotes.Web.Extensions;
 using FundooNotes.Web.Service;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
 using ModelLayer.Entity;
 using NLog.Web;
 using RepositoryLayer.Context;
 using RepositoryLayer.Interface;
 using RepositoryLayer.Repository;
 using System.Text;
+using FundooNotes.Web.Messaging;
 
 namespace FundooNotes.Web
 {
@@ -45,7 +45,7 @@ namespace FundooNotes.Web
                 options.InstanceName = "FundooNotes:";
             });
 
-            // 1. Add Swagger services
+            // Add Swagger services
             //builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerConfiguration();
 
@@ -61,7 +61,8 @@ namespace FundooNotes.Web
             builder.Services.AddScoped<INoteService, NoteService>();
             builder.Services.AddScoped<INoteRepository, NoteRepository>();
             builder.Services.AddSingleton<IEncryptionService, AesGcmEncryptionService>();
-
+            builder.Services.AddSingleton<IEmailProducerService, EmailProducerService>();
+            builder.Services.AddHostedService<EmailConsumerService>();
             //---
             var jwtKey = builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException("JWT key is missing.");
 
@@ -85,38 +86,12 @@ namespace FundooNotes.Web
                     };
                 });
 
-            //builder.Services.AddSwaggerGen(options =>
-            //{
-            //    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-            //    {
-            //        Name = "Authorization",
-            //        Type = SecuritySchemeType.Http,
-            //        Scheme = "bearer",
-            //        BearerFormat = "JWT",
-            //        In = ParameterLocation.Header,
-            //        Description = "Enter your JWT token."
-            //    });
-
-            //    options.AddSecurityRequirement(new OpenApiSecurityRequirement
-            //    {
-            //        {
-            //            new OpenApiSecurityScheme
-            //            {
-            //                Reference = new OpenApiReference
-            //                {
-            //                    Type = ReferenceType.SecurityScheme,
-            //                    Id = "Bearer"
-            //                }
-            //            },
-            //            new List<string>()
-            //        }
-            //    });
-            //});
-
             builder.Services.AddAuthorization();
             // ---
 
             var app = builder.Build();
+
+            app.UseMiddleware<RequestTimingMiddleware>();
 
             app.UseExceptionHandler();
             

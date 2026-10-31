@@ -7,7 +7,8 @@ using RepositoryLayer.Repository;
 using System.Security.Cryptography;
 using System.Text;
 using ModelLayer.Models.Auth;
-
+//using FundooNotes.Web.Messaging;
+using ModelLayer.Models.Email;
 namespace BusinessLayer.Service
 {
     public class UserService : IUserService
@@ -16,12 +17,19 @@ namespace BusinessLayer.Service
         private readonly IEmailService _emailService;
         private readonly IPasswordHasher<UserEntity> _passwordHasher;
         private readonly IJwtService _jwtService;
-        public UserService(IUserRepository userRepo, IEmailService emailService, IPasswordHasher<UserEntity> passwordHasher, IJwtService jwtService)
+        private readonly IEmailProducerService _emailProducerService;
+        public UserService(
+            IUserRepository userRepo, 
+            IEmailService emailService, 
+            IPasswordHasher<UserEntity> passwordHasher, 
+            IJwtService jwtService,
+            IEmailProducerService emailProducerService)
         {
             _passwordHasher = passwordHasher;
             _userRepo = userRepo;
             _emailService = emailService;
             _jwtService = jwtService;
+            _emailProducerService = emailProducerService;
         }
 
 
@@ -95,10 +103,17 @@ namespace BusinessLayer.Service
                 If you did not request this, you can ignore this email.
                 """;
 
-            await _emailService.SendEmailAsync(
-                email,
-                "Fundoo Notes - Password Reset",
-                body);
+            await _emailProducerService.EnqueueAsync(new EmailMessage()
+            {
+                To = email,
+                Subject =  "Fundoo Notes - Password Reset",
+                Body = body,
+            });
+
+            //await _emailService.SendEmailAsync(
+            //    email,
+            //    "Fundoo Notes - Password Reset",
+            //    body);
         }
 
         public async Task<bool> ResetPasswordAsync(ResetPasswordModel model)
@@ -114,10 +129,28 @@ namespace BusinessLayer.Service
 
             var user = await _userRepo.GetUserByResetTokenHash(tokenHash);
 
-            if (user == null ||
-            user.PasswordResetTokenExpiryUtc == null ||
-            user.PasswordResetTokenExpiryUtc <= DateTime.UtcNow)
+            //if (user == null ||
+            //user.PasswordResetTokenExpiryUtc == null ||
+            //user.PasswordResetTokenExpiryUtc <= DateTime.UtcNow)
+            //{
+            //    return false;
+            //}
+
+            if (user == null)
             {
+                Console.WriteLine("DEBUG: Token hash did not match any user");
+                return false;
+            }
+
+            if (user.PasswordResetTokenExpiryUtc == null)
+            {
+                Console.WriteLine("DEBUG: Token expiry is null");
+                return false;
+            }
+
+            if (user.PasswordResetTokenExpiryUtc <= DateTime.UtcNow)
+            {
+                Console.WriteLine("DEBUG: Token has expired");
                 return false;
             }
 

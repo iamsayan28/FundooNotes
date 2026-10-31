@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
-namespace FundooNotes.Web.Exceptions
+namespace FundooNotes.Web.Middleware
 {
     public class GlobalExceptionHandler :  IExceptionHandler
     {
@@ -15,7 +15,7 @@ namespace FundooNotes.Web.Exceptions
         {
             _logger.LogError(
                 exception, 
-                "An unhandled exception occured while processing {HttpMethod} {RequestPath}}", 
+                "An unhandled exception occured while processing {HttpMethod} {RequestPath}. Trace Id:{TraceId}", 
                 httpContext.Request.Method, 
                 httpContext.Request.Path, 
                 httpContext.TraceIdentifier);
