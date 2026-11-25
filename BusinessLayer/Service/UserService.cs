@@ -9,6 +9,9 @@ using System.Text;
 using ModelLayer.Models.Auth;
 //using FundooNotes.Web.Messaging;
 using ModelLayer.Models.Email;
+using BusinessLayer.Exceptions;
+using ModelLayer.Models;
+
 namespace BusinessLayer.Service
 {
     public class UserService : IUserService
@@ -33,8 +36,16 @@ namespace BusinessLayer.Service
         }
 
 
-        public async Task<UserRegistrationModel> RegisterUser(UserRegistrationModel registrationModel)
-        { 
+        public async Task<UserResponseModel> RegisterUser(UserRegistrationModel registrationModel)
+        {
+            var email = registrationModel.Email.Trim().ToLowerInvariant();
+            var contactNo = registrationModel.ContactNo.Trim();
+
+            if (await _userRepo.EmailExistsAsync(email))
+                throw new ConflictException("A user with this email already exists.");
+
+            if (await _userRepo.ContactNoExistsAsync(contactNo))
+                throw new ConflictException("A user with this contact number already exists.");
 
             UserEntity user = new UserEntity()
             {
@@ -46,9 +57,24 @@ namespace BusinessLayer.Service
 
             user.Password = _passwordHasher.HashPassword(user, registrationModel.Password);
 
-            await _userRepo.AddUser(user);
 
-            return registrationModel;
+            try
+            {
+                await _userRepo.AddUser(user);
+            }
+            catch (DbUpdateException)
+            {
+                throw new ConflictException("Email or contact number is already registered.");
+            }
+
+            return new UserResponseModel
+            {
+                Id = user.Id,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Email = user.Email,
+                ContactNo = user.ContactNo
+            };
         }
 
         public async Task<LoginResponseModel?> LoginUser(UserLoginModel loginModel)

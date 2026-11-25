@@ -19,20 +19,20 @@ namespace BusinessLayer.Service
         public string GenerateToken(string userId, string email)
         {
             var key = _configuration["Jwt:Key"] ?? throw new InvalidOperationException("No jwt key established");
-            var issuer = _configuration["Jwt:Issuer"];
-            var audience = _configuration["Jwt:Audience"];
+            var issuer = _configuration["Jwt:Issuer"];                                          // Payload 
+            var audience = _configuration["Jwt:Audience"];                                      // Payload 
             var expiryMinutes = int.Parse(_configuration["Jwt:ExpiryMinutes"] ?? "15");
 
-            var claims = new[]{
+            var claims = new[]{                                                                 // Payload 
                     new Claim(ClaimTypes.NameIdentifier, userId),
                     new Claim(ClaimTypes.Email, email) 
             };
 
-            var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
+            var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));             // Signature(proof that the token wasnt tampered with)
 
-            var credentials = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256);
+            var credentials = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256);// Header
 
-            var expires = DateTime.UtcNow.AddMinutes(expiryMinutes);
+            var expires = DateTime.UtcNow.AddMinutes(expiryMinutes);                            // Payload 
 
             var token = new JwtSecurityToken(
                 issuer: issuer,

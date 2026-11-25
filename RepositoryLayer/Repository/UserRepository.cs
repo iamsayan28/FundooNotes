@@ -43,5 +43,9 @@ namespace RepositoryLayer.Repository
         {
             return await _dbContext.Users.FirstOrDefaultAsync(u => u.PasswordResetTokenHash == token);
         }
+
+        public async Task<bool> EmailExistsAsync(string email) => await _dbContext.Users.AnyAsync(u => u.Email == email);
+
+        public async Task<bool> ContactNoExistsAsync(string phone) => await _dbContext.Users.AnyAsync(u => u.ContactNo == phone);
     }
 }

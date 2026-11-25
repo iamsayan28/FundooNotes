@@ -13,5 +13,16 @@ namespace RepositoryLayer.Context
         public FundooDbContext(DbContextOptions<FundooDbContext> options) : base(options) { }
         public DbSet<UserEntity> Users => Set<UserEntity>();
         public DbSet<NoteEntity> Notes => Set<NoteEntity>();
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<UserEntity>(entity =>
+            {
+                entity.HasIndex(u => u.Email).IsUnique();
+                entity.HasIndex(u => u.ContactNo).IsUnique();
+            });
+        }
+
+
     }
 }

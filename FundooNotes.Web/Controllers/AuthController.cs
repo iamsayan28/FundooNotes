@@ -1,3 +1,4 @@
+using BusinessLayer.Exceptions;
 using BusinessLayer.Interface;
 using BusinessLayer.Service;
 using FundooNotes.Web.Service;
@@ -23,11 +24,6 @@ namespace FundooNotes.Web.Controllers
             _userService = userService;
         }
 
-        private string Welcome() 
-        {
-            return "Welcome to fundoo app";
-        }
-
         [Authorize]
         [HttpGet("auth-test")]
         public IActionResult AuthTest()
@@ -39,23 +35,23 @@ namespace FundooNotes.Web.Controllers
         [Route("register")]
         public async Task<IActionResult> RegisterUser(UserRegistrationModel registrationModel)
         {
-            var result = await _userService.RegisterUser(registrationModel);
-
-            if (result != null)
+            try
             {
-                return Ok(new ResponseModel<UserRegistrationModel>()
+                var result = await _userService.RegisterUser(registrationModel);
+
+                return Ok(new ResponseModel<UserResponseModel>
                 {
                     Success = true,
                     Message = "User registered successfully",
                     Data = result
                 });
             }
-            else
+            catch (ConflictException ex)
             {
-                return BadRequest(new ResponseModel<UserRegistrationModel>()
+                return Conflict(new ResponseModel<UserResponseModel>
                 {
                     Success = false,
-                    Message = "User registration failed",
+                    Message = ex.Message,
                     Data = null
                 });
             }

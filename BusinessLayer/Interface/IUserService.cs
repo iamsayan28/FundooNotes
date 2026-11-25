@@ -1,4 +1,5 @@
-﻿using ModelLayer.Models.Auth;
+﻿using ModelLayer.Models;
+using ModelLayer.Models.Auth;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,7 +11,7 @@ namespace BusinessLayer.Interface
     public interface IUserService
     {
         public Task<LoginResponseModel?> LoginUser(UserLoginModel loginModel);
-        public Task<UserRegistrationModel> RegisterUser(UserRegistrationModel registrationModel);
+        public Task<UserResponseModel> RegisterUser(UserRegistrationModel registrationModel);
         public Task ForgotPasswordAsync(string email);
         public Task<bool> ResetPasswordAsync(ResetPasswordModel model);
     }

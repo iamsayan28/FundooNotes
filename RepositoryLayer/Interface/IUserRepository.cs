@@ -14,9 +14,10 @@ namespace RepositoryLayer.Interface
         //public Task<bool> LoginUser(UserLoginModel loginModel);
         public Task<UserEntity?> GetUserByEmailId(string email);
         public Task<UserEntity?> GetUserById(int id);
-
         public Task UpdateUser(UserEntity user);
         public Task<UserEntity?> GetUserByResetTokenHash(string token);
         public Task AddUser(UserEntity user);
+        public Task<bool> EmailExistsAsync(string email);
+        public Task<bool> ContactNoExistsAsync(string phone);
     }
 }
